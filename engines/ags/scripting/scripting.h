@@ -41,7 +41,7 @@ RuntimeValue Script_UnimplementedStub(AGSEngine *vm, ScriptObject *self, const C
 class AudioChannel;
 class AudioClip;
 class DateTime;
-class DialogTopic;
+struct DialogTopic;
 class DialogOptionsRenderingInfo;
 class DrawingSurface;
 class DynamicSprite;

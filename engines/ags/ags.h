@@ -33,6 +33,9 @@
 #include "engines/engine.h"
 #include "engines/game.h"
 
+// for NewInteractionEvent
+#include "gamefile.h"
+
 // for RuntimeValue
 #include "engines/ags/script.h"
 
@@ -55,6 +58,8 @@ class ScriptObject;
 class SpriteSet;
 class Character;
 class ccInstance;
+
+struct NewInteractionEvent;
 
 struct PendingScript {
 	Common::String name;

@@ -233,7 +233,7 @@ bool PathFinder::findNearestWalkableArea(const Graphics::Surface &tempMask, int 
 			if (*(const byte *)tempMask.getBasePtr(x, y) != 232)
 				continue;
 
-			uint distance = (uint)sqrt((x - _dest.x) * (x - _dest.x) + (y - _dest.y) * (y - _dest.y));
+			uint distance = (uint)sqrt( (double)(x - _dest.x) * (x - _dest.x) + (y - _dest.y) * (y - _dest.y));
 			if (distance < nearest) {
 				nearest = distance;
 				best = Common::Point(x, y);
