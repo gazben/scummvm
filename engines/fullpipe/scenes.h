@@ -8,12 +8,12 @@
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
-
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -25,11 +25,14 @@
 
 namespace Fullpipe {
 
+struct Bat;
 struct BehaviorEntryInfo;
+struct Hanger;
 class MGM;
 class MctlLadder;
 struct Ring;
 class StaticANIObject;
+struct Swinger;
 
 int defaultUpdateCursor();
 
@@ -69,6 +72,10 @@ void scene08_setupMusic();
 int sceneHandler08(ExCommand *cmd);
 int scene08_updateCursor();
 
+int scene09_updateCursor();
+void scene09_initScene(Scene *sc);
+int sceneHandler09(ExCommand *cmd);
+
 void scene10_initScene(Scene *sc);
 int sceneHandler10(ExCommand *cmd);
 int scene10_updateCursor();
@@ -103,7 +110,19 @@ int sceneHandler17(ExCommand *cmd);
 int scene17_updateCursor();
 
 void scene18_preload();
-void scene19_preload(Scene *sc, int key);
+void scene18_setupEntrance();
+void scene18_initScene1(Scene *sc);
+void scene18_initScene2(Scene *sc);
+int sceneHandler18(ExCommand *cmd);
+int scene18_updateCursor();
+
+void scene19_preload();
+void scene19_setMovements(Scene *sc, int entranceId);
+void scene19_initScene2();
+void scene19_setMovements(Scene *sc, int key);
+int sceneHandler19(ExCommand *cmd);
+int scene19_updateCursor();
+void scene19_setSugarState(Scene *sc);
 
 void scene20_initScene(Scene *sc);
 int sceneHandler20(ExCommand *ex);
@@ -136,8 +155,12 @@ void scene26_setupDrop(Scene *sc);
 int sceneHandler26(ExCommand *cmd);
 int scene26_updateCursor();
 
+void scene27_initScene(Scene *sc);
+int sceneHandler27(ExCommand *ex);
+int scene27_updateCursor();
+
 void scene28_initScene(Scene *sc);
- int sceneHandler28(ExCommand *ex);
+int sceneHandler28(ExCommand *ex);
 int scene28_updateCursor();
 
 int scene30_updateCursor();
@@ -182,6 +205,30 @@ int sceneHandlerFinal(ExCommand *cmd);
 
 void sceneDbgMenu_initScene(Scene *sc);
 int sceneHandlerDbgMenu(ExCommand *cmd);
+
+struct Ball {
+	Ball *p0;
+	Ball *p1;
+	StaticANIObject *ani;
+
+	Ball() : p0(0), p1(0), ani(0) {}
+};
+
+struct BallChain {
+	Ball *pHead;
+	Ball *field_8;
+	int numBalls;
+	Ball *pTail;
+	byte *cPlex;
+	int cPlexLen;
+
+	BallChain() : pHead(0), field_8(0), pTail(0), numBalls(0), cPlex(0), cPlexLen(0) {}
+	~BallChain() { free(cPlex); }
+
+	void init(Ball **ball);
+	Ball *sub04(Ball *ballP, Ball *ballN);
+	void reset() { pHead = 0; pTail = 0; field_8 = 0; numBalls = 0; free(cPlex); cPlex = 0; cPlexLen = 0; }
+};
 
 class Vars {
 public:
@@ -314,6 +361,24 @@ public:
 	bool scene08_stairsVisible;
 	int scene08_manOffsetY;
 
+	int scene09_dudeY;
+	StaticANIObject *scene09_flyingBall;
+	int scene09_numSwallenBalls;
+	StaticANIObject *scene09_gulper;
+	StaticANIObject *scene09_spitter;
+	StaticANIObject *scene09_grit;
+	bool scene09_gulperIsPresent;
+	bool scene09_dudeIsOnLadder;
+	int scene09_interactingHanger;
+	int scene09_intHangerPhase;
+	int scene09_intHangerMaxPhase;
+	BallChain scene09_balls;
+	Common::Array<Hanger *> scene09_hangers;
+	BallChain scene09_flyingBalls;
+	int scene09_numMovingHangers;
+	int scene09_clickY;
+	Common::Point scene09_hangerOffsets[4];
+
 	StaticANIObject *scene10_gum;
 	StaticANIObject *scene10_packet;
 	StaticANIObject *scene10_packet2;
@@ -408,7 +473,39 @@ public:
 	bool scene17_handPhase;
 	int scene17_sceneEdgeX;
 
-	int scene18_var01;
+	bool scene18_inScene18p1;
+	StaticANIObject *scene18_whirlgig;
+	Common::Array<Swinger *> scene18_swingers;
+	int scene18_wheelCenterX;
+	int scene18_wheelCenterY;
+	bool scene18_bridgeIsConvoluted;
+	int scene18_whirlgigMovMum;
+	bool scene18_girlIsSwinging;
+	int scene18_rotationCounter;
+	int scene18_manY;
+	bool scene18_wheelFlipper;
+	bool scene18_wheelIsTurning;
+	int scene18_kidIsOnWheel;
+	int scene18_boyIsOnWheel;
+	int scene18_girlIsOnWheel;
+	bool scene18_boyJumpedOff;
+	int scene18_manWheelPos;
+	int scene18_manWheelPosTo;
+	int scene18_kidWheelPos;
+	int scene18_kidWheelPosTo;
+	int scene18_jumpDistance;
+	int scene18_jumpAngle;
+	bool scene18_manIsReady;
+	bool scene18_enteredTrubaRight;
+	StaticANIObject *scene18_boy;
+	StaticANIObject *scene18_girl;
+	StaticANIObject *scene18_domino;
+	int scene18_boyJumpX;
+	int scene18_boyJumpY;
+	int scene18_girlJumpX;
+	int scene18_girlJumpY;
+
+	bool scene19_enteredTruba3;
 
 	int scene20_fliesCountdown;
 	StaticANIObject *scene20_grandma;
@@ -460,6 +557,25 @@ public:
 	PictureObject *scene26_sockPic;
 	StaticANIObject *scene26_sock;
 	StaticANIObject *scene26_activeVent;
+
+	PictureObject *scene27_hitZone;
+	StaticANIObject *scene27_driver;
+	StaticANIObject *scene27_maid;
+	StaticANIObject *scene27_batHandler;
+	bool scene27_driverHasVent;
+	StaticANIObject *scene27_bat;
+	bool scene27_dudeIsAiming;
+	bool scene27_maxPhaseReached;
+	bool scene27_wipeIsNeeded;
+	bool scene27_driverPushedButton;
+	int scene27_numLostBats;
+	int scene27_knockCount;
+	int scene27_aimStartX;
+	int scene27_aimStartY;
+	int scene27_launchPhase;
+	BallChain scene27_balls;
+	Common::Array<Bat *> scene27_bats;
+	Common::Array<Bat *> scene27_var07;
 
 	bool scene28_fliesArePresent;
 	bool scene28_beardedDirection;
